@@ -3,7 +3,7 @@ from .models import TodoItem
 
 def todo_list(request):
     todos = TodoItem.objects.all()
-    return render(request, 'todo/todo_list.html', {'todos': todos})
+    return render(request, 'todo_list.html', {'todos': todos})
 
 def add_todo(request):
     if request.method == 'POST':
