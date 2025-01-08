@@ -1,0 +1,56 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+db.sqlite3-journal
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# MacOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+
+# Static files and media
+/media/
+
+# Coverage reports
+.coverage
+*.cover
+
+# pytest cache
+.cache/
+
+# mypy type checker
+.mypy_cache/
+
+# Django secret key
+secrets.py
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Pycharm project files
+.idea/
+
+# Environment variable files
+.env
