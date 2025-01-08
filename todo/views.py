@@ -1,16 +1,15 @@
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import TodoItem
 
 def todo_list(request):
     todos = TodoItem.objects.all()
-    todos_list = [{"text": todo.text, "completed": todo.completed} for todo in todos]
-    return JsonResponse(todos_list, safe=False)
+    return render(request, 'todo/todo_list.html', {'todos': todos})
 
 def add_todo(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         text = request.POST.get('text')
         if text:
             TodoItem.objects.create(text=text)
-            return JsonResponse({"message": "Todo added successfully!"}, status=201)
-        return JsonResponse({"message": "Text is required"}, status=400)
+        return redirect('todo_list')  # Redirect back to the to-do list after adding
+
+    return redirect('todo_list')

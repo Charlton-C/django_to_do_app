@@ -1,0 +1,42 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+<div class="todo-list">
+    <h2>To-Do Items</h2>
+
+    <ul id="todo-items">
+        {% for todo in todos %}
+            <li>
+                <input type="checkbox" {% if todo.completed %} checked {% endif %} disabled> 
+                {{ todo.text }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <form id="add-todo-form">
+        <input type="text" id="new-todo" placeholder="Add new task" required>
+        <button type="submit">Add Todo</button>
+    </form>
+</div>
+
+<script>
+	document.getElementById('add-todo-form').addEventListener('submit', function(event) {
+			event.preventDefault();
+			const newTodoText = document.getElementById('new-todo').value;
+			
+			fetch('/api/add/', {
+					method: 'POST',
+					body: new URLSearchParams({
+							'text': newTodoText
+					}),
+					headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+					}
+			}).then(response => {
+					if (response.status === 201) {
+							location.reload();  // Reload the page to show the new to-do
+					}
+			});
+	});
+</script>	
+{% endblock %}
