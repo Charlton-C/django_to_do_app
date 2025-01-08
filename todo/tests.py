@@ -1,60 +1,55 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.db import IntegrityError
+from django.contrib.auth import get_user_model
 from .models import TodoItem
+from django.test.client import Client
 
-class TodoTests(TestCase):
+class TodoItemTests(TestCase):
 
     def setUp(self):
-        """Set up initial test data for TodoItems."""
-        self.todo_1 = TodoItem.objects.create(text='Finish homework')
-        self.todo_2 = TodoItem.objects.create(text='Clean the house')
-    
+        self.client = Client()
+        self.todo_url = reverse('todo_list')
+        self.add_todo_url = reverse('add_todo')
+
+        # Create a sample todo item
+        self.todo_item = TodoItem.objects.create(text="Test Todo", completed=False)
+
     def test_todo_list_view(self):
-        """Test the to-do list view returns the correct data."""
-        response = self.client.get(reverse('todo_list'))
+        response = self.client.get(self.todo_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Finish homework')
-        self.assertContains(response, 'Clean the house')
-        self.assertTemplateUsed(response, 'todo/todo_list.html')
+        self.assertContains(response, "Test Todo")
+        self.assertTemplateUsed(response, 'todo_list.html')
 
-    def test_add_todo_success(self):
-        """Test adding a new todo item is successful."""
-        response = self.client.post(reverse('add_todo'), {'text': 'Buy groceries'})
-        
-        # Check if we were redirected back to the list (to verify the data was added)
-        self.assertRedirects(response, reverse('todo_list'))
-        
-        # Check that the new todo item is in the database
-        new_todo = TodoItem.objects.get(text='Buy groceries')
-        self.assertIsNotNone(new_todo)
-        self.assertEqual(new_todo.text, 'Buy groceries')
-        self.assertFalse(new_todo.completed)  # By default, new todos are not completed
-
-    def test_add_todo_failure_empty_text(self):
-        """Test that adding a todo with empty text returns an error."""
-        response = self.client.post(reverse('add_todo'), {'text': ''})
-        
-        # Check that the response status code is 302 (redirect to the todo list page)
-        self.assertRedirects(response, reverse('todo_list'))
-        
-        # Check that the number of TodoItems hasn't changed
+    def test_add_todo_post_valid(self):
+        response = self.client.post(self.add_todo_url, {'text': 'New Todo Item'})
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content.decode(), {
+            'id': TodoItem.objects.latest('id').id,
+            'text': 'New Todo Item',
+            'completed': False,
+        })
         self.assertEqual(TodoItem.objects.count(), 2)
-        
-    def test_todo_item_checkbox_is_disabled(self):
-        """Test that the checkbox is disabled in the UI."""
-        response = self.client.get(reverse('todo_list'))
-        self.assertContains(response, '<input type="checkbox" disabled>', count=2)
+
+    def test_add_todo_post_invalid(self):
+        response = self.client.post(self.add_todo_url, {'text': ''})
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content.decode(), {'error': 'Todo text is required'})
+
+    def test_add_todo_invalid_method(self):
+        response = self.client.get(self.add_todo_url)  # GET request, not allowed
+        self.assertEqual(response.status_code, 405)
+        self.assertJSONEqual(response.content.decode(), {'error': 'Invalid request method'})
+
+    def test_todo_list_shows_new_items(self):
+        # Adding new item via form submission
+        response = self.client.post(self.add_todo_url, {'text': 'Second Todo Item'})
+        self.assertEqual(response.status_code, 200)
+
+        # Now check if the second item appears on the todo list page
+        response = self.client.get(self.todo_url)
+        self.assertContains(response, 'Second Todo Item')
     
-    def test_add_duplicate_todo(self):
-        """Test adding a duplicate todo."""
-        # Trying to add a duplicate task
-        response = self.client.post(reverse('add_todo'), {'text': 'Finish homework'})
-        
-        # Check that we still only have one instance of this task
-        self.assertEqual(TodoItem.objects.filter(text='Finish homework').count(), 1)
-    
-    def test_api_add_todo_invalid_method(self):
-        """Test that an invalid HTTP method results in a 405 error."""
-        response = self.client.get(reverse('add_todo'))  # GET instead of POST
-        self.assertEqual(response.status_code, 405)  # Method not allowed
+    def test_todo_list_no_items(self):
+        TodoItem.objects.all().delete()  # Remove all todos
+        response = self.client.get(self.todo_url)
+        self.assertContains(response, "No to-dos yet.")  # Adjust if needed

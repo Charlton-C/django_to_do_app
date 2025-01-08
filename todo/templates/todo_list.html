@@ -5,43 +5,60 @@
     <h2>To-Do Items</h2>
 
     <ul id="todo-items">
-        {% for todo in todos %}
-            <li>
-                <input type="checkbox" {% if todo.completed %} checked {% endif %} disabled> 
-                {{ todo.text }}
-            </li>
-        {% endfor %}
+        {% if todos %}
+            {% for todo in todos %}
+                <li id="todo-{{ todo.id }}">
+                    <input type="checkbox" {% if todo.completed %} checked {% endif %} disabled> 
+                    {{ todo.text }}
+                </li>
+            {% endfor %}
+        {% else %}
+            <p>No to-dos yet.</p>
+        {% endif %}
     </ul>
 
     <form id="add-todo-form">
-				{% csrf_token %}
+        {% csrf_token %}
         <input type="text" id="new-todo" placeholder="Add new task" required>
         <button type="submit">Add Todo</button>
     </form>
 </div>
 
 <script>
-	document.getElementById('add-todo-form').addEventListener('submit', function(event) {
-			event.preventDefault();
-			const newTodoText = document.getElementById('new-todo').value;
-			const csrfToken = document.getElementById('add-todo-form').querySelector(
-				"[name=csrfmiddlewaretoken]"
-			).value;
-			
-			fetch('/add', {
-					method: 'POST',
-					body: new URLSearchParams({
-							'text': newTodoText
-					}),
-					headers: {
-							'Content-Type': 'application/x-www-form-urlencoded',
-							'X-CSRFToken': csrfToken,
-					}
-			}).then((response) => {
-					if (response.status === 200) {
-							window.location.reload();  // Reload the page to show the new to-do
-					}
-			});
-	});
-</script>	
+    document.getElementById('add-todo-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const newTodoText = document.getElementById('new-todo').value;
+        const csrfToken = document.getElementById('add-todo-form').querySelector(
+            "[name=csrfmiddlewaretoken]"
+        ).value;
+
+        fetch('/add', {
+            method: 'POST',
+            body: new URLSearchParams({
+                'text': newTodoText
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            }
+        }).then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                // Dynamically add the new todo item to the list without reloading the page
+                const todoList = document.getElementById('todo-items');
+                const newTodoItem = document.createElement('li');
+                newTodoItem.id = 'todo-' + data.id;
+                newTodoItem.innerHTML = `<input type="checkbox" disabled ${data.completed ? 'checked' : ''}> ${data.text}`;
+                todoList.appendChild(newTodoItem);
+
+                // Clear the input field
+                document.getElementById('new-todo').value = '';
+            } else {
+                alert('Error: ' + data.error);
+            }
+        }).catch(error => {
+            alert('An error occurred. Please try again.');
+        });
+    });
+</script>
 {% endblock %}
