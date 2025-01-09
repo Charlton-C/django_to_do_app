@@ -2,9 +2,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
-from .models import TodoItem
+from todo.models import TodoItem
 
-class TodoItemTests(TestCase):
+class TestTodoItem(TestCase):
 
     def setUp(self):
         self.client = Client()
