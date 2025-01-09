@@ -1,8 +1,8 @@
-from django.test import TestCase
-from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import TodoItem
+from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
+from .models import TodoItem
 
 class TodoItemTests(TestCase):
 
@@ -50,6 +50,6 @@ class TodoItemTests(TestCase):
         self.assertContains(response, 'Second Todo Item')
     
     def test_todo_list_no_items(self):
-        TodoItem.objects.all().delete()  # Remove all todos
+        TodoItem.objects.all().delete()
         response = self.client.get(self.todo_url)
-        self.assertContains(response, "No to-dos yet.")  # Adjust if needed
+        self.assertContains(response, "No to-dos yet.")
