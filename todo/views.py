@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from .models import TodoItem
+
 
 def todo_list(request):
     todos = TodoItem.objects.all()
@@ -8,10 +9,9 @@ def todo_list(request):
 
 def add_todo(request):
     if request.method == 'POST':
-        text = request.POST.get('text')
+        text = request.POST.get('new-todo')
         if text:
             new_todo = TodoItem.objects.create(text=text)
-            # Return the new todo item as a JSON response to avoid page reload
             return JsonResponse({
                 'id': new_todo.id,
                 'text': new_todo.text,

@@ -19,7 +19,7 @@
 
     <form id="add-todo-form">
         {% csrf_token %}
-        <input type="text" id="new-todo" placeholder="Add new task" required>
+        <input type="text" id="new-todo" name="new-todo" placeholder="Add new task" required>
         <button type="submit">Add Todo</button>
     </form>
 </div>
@@ -27,24 +27,21 @@
 <script>
     document.getElementById('add-todo-form').addEventListener('submit', function(event) {
         event.preventDefault();
-        const newTodoText = document.getElementById('new-todo').value;
+
+        const formData = new FormData(document.getElementById('add-todo-form'));
         const csrfToken = document.getElementById('add-todo-form').querySelector(
             "[name=csrfmiddlewaretoken]"
         ).value;
 
         fetch('/add', {
             method: 'POST',
-            body: new URLSearchParams({
-                'text': newTodoText
-            }),
+            body: formData,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': csrfToken,
             }
-        }).then(response => response.json())
-        .then(data => {
+        }).then((response) => response.json())
+        .then((data) => {
             if (data.id) {
-                // Dynamically add the new todo item to the list without reloading the page
                 const todoList = document.getElementById('todo-items');
                 const newTodoItem = document.createElement('li');
                 newTodoItem.id = 'todo-' + data.id;
