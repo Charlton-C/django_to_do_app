@@ -8,7 +8,10 @@
         {% if todos %}
             {% for todo in todos %}
                 <li id="todo-{{ todo.id }}">
-                    <input type="checkbox" {% if todo.completed %} checked {% endif %} disabled> 
+                    <form id="update-todo-item-{{ todo.id }}">
+                    {% csrf_token %}
+                        <input type="checkbox" data-todo-id="{{ todo.id }}" name="completed" {% if todo.completed %} checked {% endif %}>
+                    </form>
                     {{ todo.text }}
                 </li>
             {% endfor %}
@@ -25,6 +28,45 @@
 </div>
 
 <script>
+    document.querySelectorAll('input[name="completed"]').forEach(function(element) {
+        element.addEventListener('change', function(event) {
+            const checkbox = this;
+            const checkboxOriginalState = !checkbox.checked;
+            const checkboxId = this.dataset.todoId;
+            const formData = new FormData();
+            formData.append('id', checkboxId);
+            const csrfToken = document.getElementById(`update-todo-item-${checkboxId}`).querySelector(
+                "[name=csrfmiddlewaretoken]"
+            ).value;
+
+            fetch('/update', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then((response) => {
+				if (!response.ok) {
+					throw new Error("Network response error");
+				}
+
+				return response.json();
+			})
+            .then((data) => {
+                if (data.success) {
+                    checkbox.checked = data.new_todo_completed;
+                } else {
+                    checkbox.checked = checkboxOriginalState;
+                    console.warn('Update failed:', data.error);
+                }
+            }).catch((error) => {
+                checkbox.checked = checkboxOriginalState;
+                console.error('An error occurred:', error);
+            });
+        });
+    });
+
     document.getElementById('add-todo-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
