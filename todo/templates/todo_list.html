@@ -112,7 +112,7 @@
 
 				function createNewTodoItem(data) {
 					const newTodoItem = document.createElement("li");
-					newTodoItem.id = "todo-" + data.id;
+					newTodoItem.id = `todo-${data.id}`;
 					newTodoItem.classList.add("todo-item");
 					newTodoItem.innerHTML = `
                         <form id="update-todo-item-${data.id}">
@@ -124,7 +124,7 @@
                                 ${data.completed ? "checked" : ""}
                             />
                         </form>
-                        <span>${data.text}</span>
+                        <div>${data.text}</div>
                         <button class="delete-btn" data-todo-id="{{ todo.id }}">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
@@ -182,14 +182,6 @@
 				function addDeleteButtonListener(item) {
 					const deleteBtn = item.querySelector(".delete-btn");
 					const todoId = item.id.replace("todo-", "");
-
-					// Slide delete button on hover
-					item.addEventListener("mouseenter", () => {
-						deleteBtn.style.right = "10px";
-					});
-					item.addEventListener("mouseleave", () => {
-						deleteBtn.style.right = "-70px";
-					});
 
 					deleteBtn.addEventListener("click", (e) => {
 						e.preventDefault();

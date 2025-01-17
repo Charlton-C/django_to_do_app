@@ -56,6 +56,10 @@ ul li:hover {
 ul li input[type="checkbox"] {
 	margin-right: 10px;
 	transform: scale(1.2);
+	transition: transform 0.2s ease;
+}
+ul li input[type="checkbox"]:hover {
+	transform: scale(1.4);
 }
 
 ul li.completed {
@@ -126,9 +130,6 @@ button:active {
 }
 
 .todo-item .delete-btn {
-	position: absolute;
-	top: 50%;
-	right: -40px;
 	width: fit-content;
 	padding: 10px 12px;
 	border: none;
@@ -136,17 +137,15 @@ button:active {
 	color: white;
 	background-color: #ff6347;
 	cursor: pointer;
-	transform: translateY(-50%);
-	transition: right 0.3s ease;
+	transition: transform 0.3s ease;
 	font-size: 1rem;
 }
-
-.todo-item:hover .delete-btn {
-	right: 10px;
+.todo-item .delete-btn:hover {
+	transform: scale(1.1);
 }
 
 .todo-item.delete {
-	transform: translateX(100%);
+	transform: translateX(100vw);
 }
 
 .delete-btn i {
@@ -155,7 +154,6 @@ button:active {
 
 .todo-item.completed .delete-btn {
 	opacity: 0.6;
-	pointer-events: none;
 }
 
 @media (max-width: 768px) {
