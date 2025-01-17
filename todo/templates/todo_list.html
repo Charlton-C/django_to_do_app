@@ -153,7 +153,7 @@
                     formData.append("id", checkboxId);
                     const csrfToken = getCsrfToken(checkbox.closest("form"));
 
-                    fetch("/update", {
+                    fetch("update", {
                         method: "POST",
                         body: formData,
                         headers: { "X-CSRFToken": csrfToken },
@@ -166,7 +166,7 @@
                         })
                         .then((data) => {
                             if (data.success) {
-                                checkbox.checked = data.new_todo_completed;
+                                checkbox.checked = data.todo_completed;
                             } else {
                                 checkbox.checked = originalState;
                                 console.warn("Update failed:", data.error);
