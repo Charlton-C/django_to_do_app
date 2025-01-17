@@ -1,120 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Todo App</title>
-		{% load static %}
-		<link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-		<link
-			rel="stylesheet"
-			href="{% static 'icons/font/bootstrap-icons.min.css' %}"
-		/>
-		<link rel="icon" href="{% static 'icons/todo_check_icon.svg' %}" />
-	</head>
-	<body>
-		<header>
-			<h1>My To-Do List</h1>
-		</header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Todo App</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+        <link
+            rel="stylesheet"
+            href="{% static 'icons/font/bootstrap-icons.min.css' %}"
+        />
+        <link rel="icon" href="{% static 'icons/todo_check_icon.svg' %}" />
+    </head>
+    <body>
+        <header>
+            <h1>My To-Do List</h1>
+        </header>
 
-		<main>
-			<div class="todo-list">
-				<h2>To-Do Items</h2>
+        <main>
+            <div class="todo-list">
+                <h2>To-Do Items</h2>
 
-				<ul id="todo-items">
-					{% if todos %}
+                <ul id="todo-items">
+                    {% if todos %}
                     {% for todo in todos %}
-					<li
-						id="todo-{{ todo.id }}"
-						class="todo-item {% if todo.completed %} completed {% endif %}"
-					>
-						<form id="update-todo-item-{{ todo.id }}">
-							{% csrf_token %}
-							<input
-								type="checkbox"
-								data-todo-id="{{ todo.id }}"
-								name="completed"
-								{% if todo.completed %} checked {% endif %}
-							/>
-						</form>
-						<div>{{ todo.text }}</div>
-						<button class="delete-btn" data-todo-id="{{ todo.id }}">
-							<i class="bi bi-trash3-fill"></i>
-						</button>
-					</li>
-					{% endfor %}
+                    <li
+                        id="todo-{{ todo.id }}"
+                        class="todo-item {% if todo.completed %} completed {% endif %}"
+                    >
+                        <form id="update-todo-item-{{ todo.id }}">
+                            {% csrf_token %}
+                            <input
+                                type="checkbox"
+                                data-todo-id="{{ todo.id }}"
+                                name="completed"
+                                {% if todo.completed %} checked {% endif %}
+                            />
+                        </form>
+                        <div>{{ todo.text }}</div>
+                        <button class="delete-btn" data-todo-id="{{ todo.id }}">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </li>
+                    {% endfor %}
                     {% else %}
-					<p>No to-dos yet.</p>
-					{% endif %}
-				</ul>
+                    <p>No to-dos yet.</p>
+                    {% endif %}
+                </ul>
 
-				<form id="add-todo-form">
-					{% csrf_token %}
-					<input
-						type="text"
-						id="new-todo"
-						name="new-todo"
-						placeholder="Add new task"
-						required
-					/>
-					<button type="submit">Add Todo</button>
-				</form>
-			</div>
-		</main>
+                <form id="add-todo-form">
+                    {% csrf_token %}
+                    <input
+                        type="text"
+                        id="new-todo"
+                        name="new-todo"
+                        placeholder="Add new task"
+                        required
+                    />
+                    <button type="submit">Add Todo</button>
+                </form>
+            </div>
+        </main>
 
-		<script>
-			document.addEventListener("DOMContentLoaded", () => {
-				const todoList = document.getElementById("todo-items");
-				const addTodoForm = document.getElementById("add-todo-form");
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const todoList = document.getElementById("todo-items");
+                const addTodoForm = document.getElementById("add-todo-form");
 
-				// Initialize the existing todo items and event listeners
-				initializeTodoItems();
-				setupAddTodoForm();
+                // Initialize the existing todo items and event listeners
+                initializeTodoItems();
+                setupAddTodoForm();
 
-				function initializeTodoItems() {
-					const todoItems = document.querySelectorAll(".todo-item");
-					todoItems.forEach((item) => {
-						addDeleteButtonListener(item);
-						addCheckboxEventListener(item);
-					});
-				}
+                function initializeTodoItems() {
+                    const todoItems = document.querySelectorAll(".todo-item");
+                    todoItems.forEach((item) => {
+                        addDeleteButtonListener(item);
+                        addCheckboxEventListener(item);
+                    });
+                }
 
-				function setupAddTodoForm() {
-					addTodoForm.addEventListener("submit", (event) => {
-						event.preventDefault();
-						const formData = new FormData(addTodoForm);
-						const csrfToken = getCsrfToken(addTodoForm);
+                function setupAddTodoForm() {
+                    addTodoForm.addEventListener("submit", (event) => {
+                        event.preventDefault();
+                        const formData = new FormData(addTodoForm);
+                        const csrfToken = getCsrfToken(addTodoForm);
 
-						fetch("/add", {
-							method: "POST",
-							body: formData,
-							headers: { "X-CSRFToken": csrfToken },
-						})
-							.then((response) => {
-								if (!response.ok) {
-									throw new Error("Network response error");
-								}
-								return response.json();
-							})
-							.then((data) => {
-								if (data.success) {
-									todoList.appendChild(createNewTodoItem(data));
-									document.getElementById("new-todo").value = "";
-								} else {
-									console.warn("Adding failed:", data.error);
-								}
-							})
-							.catch((error) => {
-								console.error("An error occurred:", error);
-							});
-					});
-				}
+                        fetch("/add", {
+                            method: "POST",
+                            body: formData,
+                            headers: { "X-CSRFToken": csrfToken },
+                        })
+                            .then((response) => {
+                                if (!response.ok) {
+                                    throw new Error("Network response error");
+                                }
+                                return response.json();
+                            })
+                            .then((data) => {
+                                if (data.success) {
+                                    todoList.appendChild(createNewTodoItem(data));
+                                    document.getElementById("new-todo").value = "";
+                                } else {
+                                    console.warn("Adding failed:", data.error);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("An error occurred:", error);
+                            });
+                    });
+                }
 
-				function createNewTodoItem(data) {
-					const newTodoItem = document.createElement("li");
-					newTodoItem.id = `todo-${data.id}`;
-					newTodoItem.classList.add("todo-item");
-					newTodoItem.innerHTML = `
+                function createNewTodoItem(data) {
+                    const newTodoItem = document.createElement("li");
+                    newTodoItem.id = `todo-${data.id}`;
+                    newTodoItem.classList.add("todo-item");
+                    newTodoItem.innerHTML = `
                         <form id="update-todo-item-${data.id}">
                             {% csrf_token %}
                             <input
@@ -130,98 +130,98 @@
                         </button>
                     `;
 
-					addCheckboxEventListener(newTodoItem);
-					addDeleteButtonListener(newTodoItem);
+                    addCheckboxEventListener(newTodoItem);
+                    addDeleteButtonListener(newTodoItem);
 
-					return newTodoItem;
-				}
+                    return newTodoItem;
+                }
 
-				function addCheckboxEventListener(item) {
-					const checkbox = item.querySelector('input[name="completed"]');
-					checkbox.addEventListener("change", () => {
-						handleCheckboxChange(checkbox);
-						if (checkbox.checked) {
-							item.classList.add("completed");
-						} else {
-							item.classList.remove("completed");
-						}
-					});
-				}
+                function addCheckboxEventListener(item) {
+                    const checkbox = item.querySelector('input[name="completed"]');
+                    checkbox.addEventListener("change", () => {
+                        handleCheckboxChange(checkbox);
+                        if (checkbox.checked) {
+                            item.classList.add("completed");
+                        } else {
+                            item.classList.remove("completed");
+                        }
+                    });
+                }
 
-				function handleCheckboxChange(checkbox) {
-					const checkboxId = checkbox.dataset.todoId;
-					const originalState = !checkbox.checked;
-					const formData = new FormData();
-					formData.append("id", checkboxId);
-					const csrfToken = getCsrfToken(checkbox.closest("form"));
+                function handleCheckboxChange(checkbox) {
+                    const checkboxId = checkbox.dataset.todoId;
+                    const originalState = !checkbox.checked;
+                    const formData = new FormData();
+                    formData.append("id", checkboxId);
+                    const csrfToken = getCsrfToken(checkbox.closest("form"));
 
-					fetch("/update", {
-						method: "POST",
-						body: formData,
-						headers: { "X-CSRFToken": csrfToken },
-					})
-						.then((response) => {
-							if (!response.ok) {
-								throw new Error("Network response error");
-							}
-							return response.json();
-						})
-						.then((data) => {
-							if (data.success) {
-								checkbox.checked = data.new_todo_completed;
-							} else {
-								checkbox.checked = originalState;
-								console.warn("Update failed:", data.error);
-							}
-						})
-						.catch((error) => {
-							console.error("An error occurred:", error);
-						});
-				}
+                    fetch("/update", {
+                        method: "POST",
+                        body: formData,
+                        headers: { "X-CSRFToken": csrfToken },
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Network response error");
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (data.success) {
+                                checkbox.checked = data.new_todo_completed;
+                            } else {
+                                checkbox.checked = originalState;
+                                console.warn("Update failed:", data.error);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("An error occurred:", error);
+                        });
+                }
 
-				function addDeleteButtonListener(item) {
-					const deleteBtn = item.querySelector(".delete-btn");
-					const todoId = item.id.replace("todo-", "");
+                function addDeleteButtonListener(item) {
+                    const deleteBtn = item.querySelector(".delete-btn");
+                    const todoId = item.id.replace("todo-", "");
 
-					deleteBtn.addEventListener("click", (e) => {
-						e.preventDefault();
-						handleDelete(todoId, item);
-					});
-				}
+                    deleteBtn.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        handleDelete(todoId, item);
+                    });
+                }
 
-				function handleDelete(todoId, todoItem) {
-					const formData = new FormData();
-					formData.append("id", todoId);
-					const csrfToken = getCsrfToken(todoItem.querySelector("form"));
+                function handleDelete(todoId, todoItem) {
+                    const formData = new FormData();
+                    formData.append("id", todoId);
+                    const csrfToken = getCsrfToken(todoItem.querySelector("form"));
 
-					fetch("delete", {
-						method: "POST",
-						body: formData,
-						headers: { "X-CSRFToken": csrfToken },
-					})
-						.then((response) => {
-							if (!response.ok) {
-								throw new Error("Network response error");
-							}
-							return response.json();
-						})
-						.then((data) => {
-							if (data.success) {
-								todoItem.classList.add("delete");
-								setTimeout(() => todoItem.remove(), 500);
-							} else {
-								console.warn("Delete failed:", data.error);
-							}
-						})
-						.catch((error) => {
-							console.error("An error occurred:", error);
-						});
-				}
+                    fetch("delete", {
+                        method: "POST",
+                        body: formData,
+                        headers: { "X-CSRFToken": csrfToken },
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Network response error");
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (data.success) {
+                                todoItem.classList.add("delete");
+                                setTimeout(() => todoItem.remove(), 500);
+                            } else {
+                                console.warn("Delete failed:", data.error);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("An error occurred:", error);
+                        });
+                }
 
-				function getCsrfToken(form) {
-					return form.querySelector("[name=csrfmiddlewaretoken]").value;
-				}
-			});
-		</script>
-	</body>
+                function getCsrfToken(form) {
+                    return form.querySelector("[name=csrfmiddlewaretoken]").value;
+                }
+            });
+        </script>
+    </body>
 </html>
