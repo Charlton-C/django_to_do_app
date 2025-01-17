@@ -24,6 +24,10 @@ h1 {
     font-weight: 600;
 }
 
+.no_todo {
+    margin-top: 12px;
+}
+
 /* To-Do List Container */
 .todo_list {
     margin: 30px auto 50px;
