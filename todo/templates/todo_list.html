@@ -22,7 +22,8 @@
                 <h2>To-Do Items</h2>
 
                 <ul id="todo_items">
-                    {% if todos %} {% for todo in todos %}
+                    {% if todos %}
+                    {% for todo in todos %}
                     <li
                         id="todo_{{ todo.id }}"
                         class="todo_item {% if todo.completed %} completed {% endif %}">
