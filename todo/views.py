@@ -13,6 +13,7 @@ def add_todo(request):
         if text:
             new_todo = TodoItem.objects.create(text=text)
             return JsonResponse({
+                'success': True,
                 'id': new_todo.id,
                 'text': new_todo.text,
                 'completed': new_todo.completed,
@@ -44,3 +45,20 @@ def update_todo(request):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     except Exception as e:
         return JsonResponse({'error': 'An Internal Server Error Occurred'}, status=500)
+
+def delete_todo(request):
+    try:
+        if request.method == 'POST':
+            id = request.POST.get('id')
+            if id:
+                try:
+                    todo = TodoItem.objects.get(id=id)
+                    todo.delete()
+                    return JsonResponse({'success': True})
+                except Todo.DoesNotExist:
+                    return JsonResponse({'success': False, 'error': 'Todo not found'}, status=400)
+            else:
+                return JsonResponse({'success': False, 'error': 'Todo id is required'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'An Internal Server Error Occurred'}, status=500)

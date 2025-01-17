@@ -7,12 +7,15 @@
     <ul id="todo-items">
         {% if todos %}
             {% for todo in todos %}
-                <li id="todo-{{ todo.id }}">
+                <li id="todo-{{ todo.id }}" class="todo-item {% if todo.completed %} completed {% endif %}">
                     <form id="update-todo-item-{{ todo.id }}">
                     {% csrf_token %}
                         <input type="checkbox" data-todo-id="{{ todo.id }}" name="completed" {% if todo.completed %} checked {% endif %}>
                     </form>
-                    {{ todo.text }}
+                    <div>{{ todo.text }}</div>
+                    <button class="delete-btn" data-todo-id="{{ todo.id }}">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
                 </li>
             {% endfor %}
         {% else %}
@@ -28,76 +31,167 @@
 </div>
 
 <script>
-    document.querySelectorAll('input[name="completed"]').forEach(function(element) {
-        element.addEventListener('change', function(event) {
-            const checkbox = this;
-            const checkboxOriginalState = !checkbox.checked;
-            const checkboxId = this.dataset.todoId;
+    document.addEventListener('DOMContentLoaded', () => {
+        const todoList = document.getElementById('todo-items');
+        const addTodoForm = document.getElementById('add-todo-form');
+        
+        // Initialize the existing todo items and event listeners
+        initializeTodoItems();
+        setupAddTodoForm();
+
+        function initializeTodoItems() {
+            const todoItems = document.querySelectorAll('.todo-item');
+            todoItems.forEach(item => {
+                addDeleteButtonListener(item);
+                addCheckboxEventListener(item);
+            });
+        }
+
+        function setupAddTodoForm() {
+            addTodoForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const formData = new FormData(addTodoForm);
+                const csrfToken = getCsrfToken(addTodoForm);
+
+                fetch('/add', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': csrfToken }
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response error');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        todoList.appendChild(createNewTodoItem(data));
+                        document.getElementById('new-todo').value = '';
+                    } else {
+                        console.warn('Adding failed:', data.error);
+                    }
+                })
+                .catch((error) => {
+                    console.error('An error occurred:', error);
+                });
+            });
+        }
+
+        function createNewTodoItem(data) {
+            const newTodoItem = document.createElement('li');
+            newTodoItem.id = 'todo-' + data.id;
+            newTodoItem.classList.add('todo-item');
+            newTodoItem.innerHTML = `
+                <form id="update-todo-item-${data.id}">
+                    {% csrf_token %}
+                    <input type="checkbox" data-todo-id="${data.id}" name="completed" ${data.completed ? 'checked' : ''}>
+                </form>
+                <span>${data.text}</span>
+                <button class="delete-btn" data-todo-id="{{ todo.id }}">
+                    <i class="bi bi-trash3-fill"></i>
+                </button>
+            `;
+
+            addCheckboxEventListener(newTodoItem);
+            addDeleteButtonListener(newTodoItem);
+
+            return newTodoItem;
+        }
+
+        function addCheckboxEventListener(item) {
+            const checkbox = item.querySelector('input[name="completed"]');
+            checkbox.addEventListener('change', () => {
+                handleCheckboxChange(checkbox);
+                if (checkbox.checked) {
+                    item.classList.add('completed');
+                } else {
+                    item.classList.remove('completed');
+                }
+            });
+        }
+
+        function handleCheckboxChange(checkbox) {
+            const checkboxId = checkbox.dataset.todoId;
+            const originalState = !checkbox.checked;
             const formData = new FormData();
             formData.append('id', checkboxId);
-            const csrfToken = document.getElementById(`update-todo-item-${checkboxId}`).querySelector(
-                "[name=csrfmiddlewaretoken]"
-            ).value;
+            const csrfToken = getCsrfToken(checkbox.closest('form'));
 
             fetch('/update', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                }
+                headers: { 'X-CSRFToken': csrfToken }
             })
             .then((response) => {
-				if (!response.ok) {
-					throw new Error("Network response error");
-				}
-
-				return response.json();
-			})
-            .then((data) => {
+                if (!response.ok) {
+                    throw new Error('Network response error');
+                }
+                return response.json();
+            })
+            .then(data => {
                 if (data.success) {
                     checkbox.checked = data.new_todo_completed;
                 } else {
-                    checkbox.checked = checkboxOriginalState;
+                    checkbox.checked = originalState;
                     console.warn('Update failed:', data.error);
                 }
-            }).catch((error) => {
-                checkbox.checked = checkboxOriginalState;
+            })
+            .catch((error) => {
                 console.error('An error occurred:', error);
             });
-        });
-    });
+        }
 
-    document.getElementById('add-todo-form').addEventListener('submit', function(event) {
-        event.preventDefault();
+        function addDeleteButtonListener(item) {
+            const deleteBtn = item.querySelector('.delete-btn');
+            const todoId = item.id.replace('todo-', '');
 
-        const formData = new FormData(document.getElementById('add-todo-form'));
-        const csrfToken = document.getElementById('add-todo-form').querySelector(
-            "[name=csrfmiddlewaretoken]"
-        ).value;
+            // Slide delete button on hover
+            item.addEventListener('mouseenter', () => {
+                deleteBtn.style.right = '10px';
+            });
+            item.addEventListener('mouseleave', () => {
+                deleteBtn.style.right = '-70px';
+            });
 
-        fetch('/add', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': csrfToken,
-            }
-        }).then((response) => response.json())
-        .then((data) => {
-            if (data.id) {
-                const todoList = document.getElementById('todo-items');
-                const newTodoItem = document.createElement('li');
-                newTodoItem.id = 'todo-' + data.id;
-                newTodoItem.innerHTML = `<input type="checkbox" disabled ${data.completed ? 'checked' : ''}> ${data.text}`;
-                todoList.appendChild(newTodoItem);
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                handleDelete(todoId, item);
+            });
+        }
 
-                // Clear the input field
-                document.getElementById('new-todo').value = '';
-            } else {
-                alert('Error: ' + data.error);
-            }
-        }).catch(error => {
-            alert('An error occurred. Please try again.');
-        });
+        function handleDelete(todoId, todoItem) {
+            const formData = new FormData();
+            formData.append('id', todoId);
+            const csrfToken = getCsrfToken(todoItem.querySelector('form'));
+
+            fetch('delete', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': csrfToken }
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response error');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    todoItem.classList.add('delete');
+                    setTimeout(() => todoItem.remove(), 500);
+                } else {
+                    console.warn('Delete failed:', data.error);
+                }
+            })
+            .catch((error) => {
+                console.error('An error occurred:', error);
+            });
+        }
+
+        function getCsrfToken(form) {
+            return form.querySelector("[name=csrfmiddlewaretoken]").value;
+        }
     });
 </script>
 {% endblock %}
