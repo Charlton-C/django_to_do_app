@@ -18,17 +18,15 @@
         </header>
 
         <main>
-            <div class="todo-list">
+            <div class="todo_list">
                 <h2>To-Do Items</h2>
 
-                <ul id="todo-items">
-                    {% if todos %}
-                    {% for todo in todos %}
+                <ul id="todo_items">
+                    {% if todos %} {% for todo in todos %}
                     <li
-                        id="todo-{{ todo.id }}"
-                        class="todo-item {% if todo.completed %} completed {% endif %}"
-                    >
-                        <form id="update-todo-item-{{ todo.id }}">
+                        id="todo_{{ todo.id }}"
+                        class="todo_item {% if todo.completed %} completed {% endif %}">
+                        <form id="update_todo_item_{{ todo.id }}">
                             {% csrf_token %}
                             <input
                                 type="checkbox"
@@ -38,7 +36,7 @@
                             />
                         </form>
                         <div>{{ todo.text }}</div>
-                        <button class="delete-btn" data-todo-id="{{ todo.id }}">
+                        <button class="delete_btn" data-todo-id="{{ todo.id }}">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
                     </li>
@@ -48,12 +46,12 @@
                     {% endif %}
                 </ul>
 
-                <form id="add-todo-form">
+                <form id="add_todo_form">
                     {% csrf_token %}
                     <input
                         type="text"
-                        id="new-todo"
-                        name="new-todo"
+                        id="new_todo"
+                        name="new_todo"
                         placeholder="Add new task"
                         required
                     />
@@ -64,15 +62,15 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-                const todoList = document.getElementById("todo-items");
-                const addTodoForm = document.getElementById("add-todo-form");
+                const todoList = document.getElementById("todo_items");
+                const addTodoForm = document.getElementById("add_todo_form");
 
                 // Initialize the existing todo items and event listeners
                 initializeTodoItems();
                 setupAddTodoForm();
 
                 function initializeTodoItems() {
-                    const todoItems = document.querySelectorAll(".todo-item");
+                    const todoItems = document.querySelectorAll(".todo_item");
                     todoItems.forEach((item) => {
                         addDeleteButtonListener(item);
                         addCheckboxEventListener(item);
@@ -85,7 +83,7 @@
                         const formData = new FormData(addTodoForm);
                         const csrfToken = getCsrfToken(addTodoForm);
 
-                        fetch("/add", {
+                        fetch("add", {
                             method: "POST",
                             body: formData,
                             headers: { "X-CSRFToken": csrfToken },
@@ -99,7 +97,7 @@
                             .then((data) => {
                                 if (data.success) {
                                     todoList.appendChild(createNewTodoItem(data));
-                                    document.getElementById("new-todo").value = "";
+                                    document.getElementById("new_todo").value = "";
                                 } else {
                                     console.warn("Adding failed:", data.error);
                                 }
@@ -112,10 +110,10 @@
 
                 function createNewTodoItem(data) {
                     const newTodoItem = document.createElement("li");
-                    newTodoItem.id = `todo-${data.id}`;
-                    newTodoItem.classList.add("todo-item");
+                    newTodoItem.id = `todo_${data.id}`;
+                    newTodoItem.classList.add("todo_item");
                     newTodoItem.innerHTML = `
-                        <form id="update-todo-item-${data.id}">
+                        <form id="update_todo_item_${data.id}">
                             {% csrf_token %}
                             <input
                                 type="checkbox"
@@ -125,7 +123,7 @@
                             />
                         </form>
                         <div>${data.text}</div>
-                        <button class="delete-btn" data-todo-id="{{ todo.id }}">
+                        <button class="delete_btn" data-todo-id="{{ todo.id }}">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
                     `;
@@ -180,8 +178,8 @@
                 }
 
                 function addDeleteButtonListener(item) {
-                    const deleteBtn = item.querySelector(".delete-btn");
-                    const todoId = item.id.replace("todo-", "");
+                    const deleteBtn = item.querySelector(".delete_btn");
+                    const todoId = item.id.replace("todo_", "");
 
                     deleteBtn.addEventListener("click", (e) => {
                         e.preventDefault();

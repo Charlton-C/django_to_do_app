@@ -9,7 +9,7 @@ def todo_list(request):
 
 def add_todo(request):
     if request.method == 'POST':
-        text = request.POST.get('new-todo')
+        text = request.POST.get('new_todo')
         if text:
             new_todo = TodoItem.objects.create(text=text)
             return JsonResponse({
