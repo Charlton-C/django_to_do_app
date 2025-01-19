@@ -16,6 +16,16 @@ Finished a task? Just check the box, and the task will be marked as completed. I
 ✨ **Delete Todos**  
 No more clutter! Delete tasks once you're done with them by clicking the trash icon.
 
+## Screenshots
+
+Here are some screenshots of the Todo App in action:
+
+   ![Todo List](screenshots/screenshot_1.png)
+
+   ![Completed Todos](screenshots/screenshot_2.png)
+
+   ![Deleted Todo](screenshots/screenshot_3.png)
+
 ## Technologies Used
 
 - **Backend:** Django (Python)
@@ -78,14 +88,12 @@ Ready to get started? Follow these simple steps and you’ll have the Todo app r
    Open your browser and go to:  
    <http://127.0.0.1:8000/>
 
-
 ## Why You'll Love This Todo App ✨
 
 - **Super Easy to Use:** No complicated setups or workflows. Add, update, and delete tasks with just a few clicks.
 - **Interactive:** Enjoy a seamless experience with dynamic updates. Check off tasks and see them disappear with style.
 - **Aesthetic Design:** With a clean and modern design, your to-do list becomes a delightful part of your day.
 - **Fast and Efficient:** Add new tasks quickly, and keep track of your progress in no time.
-
 
 ## Contribute & Make It Even Better 🚀
 
