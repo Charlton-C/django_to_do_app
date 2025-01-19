@@ -22,7 +22,7 @@
                 <h2>To-Do Items</h2>
 
                 <ul id="todo_items">
-                    {% if todos %}
+                    <p class="no_todo {% if todos %} hidden {% endif %}">No to-dos yet.</p>
                     {% for todo in todos %}
                     <li
                         id="todo_{{ todo.id }}"
@@ -42,9 +42,6 @@
                         </button>
                     </li>
                     {% endfor %}
-                    {% else %}
-                    <p class="no_todo">No to-dos yet.</p>
-                    {% endif %}
                 </ul>
 
                 <form id="add_todo_form">
@@ -99,6 +96,9 @@
                                 if (data.success) {
                                     todoList.appendChild(createNewTodoItem(data));
                                     document.getElementById("new_todo").value = "";
+                                    if (document.querySelectorAll(".todo_item").length > 0) {
+                                        document.querySelector(".no_todo").classList.add("hidden");
+                                    }
                                 } else {
                                     console.warn("Adding failed:", data.error);
                                 }
@@ -207,7 +207,12 @@
                         .then((data) => {
                             if (data.success) {
                                 todoItem.classList.add("delete");
-                                setTimeout(() => todoItem.remove(), 500);
+                                setTimeout(() => {
+                                    todoItem.remove();
+                                    if (document.querySelectorAll(".todo_item").length <= 0) {
+                                        document.querySelector(".no_todo").classList.remove("hidden");
+                                    }
+                                }, 500);
                             } else {
                                 console.warn("Delete failed:", data.error);
                             }
